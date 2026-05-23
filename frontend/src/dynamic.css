@@ -1,0 +1,118 @@
+.dynamic-bg-container {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: #030610; 
+  overflow: hidden;
+}
+
+.mesh-blob {
+  position: absolute;
+  filter: blur(120px);
+  border-radius: 50%;
+  animation: float-blob 20s infinite alternate ease-in-out;
+  opacity: 0.15;
+}
+
+.mesh-1 {
+  background: var(--primary); 
+  width: 60vw;
+  height: 60vh;
+  top: -10%;
+  left: -20%;
+  animation-duration: 25s;
+}
+
+.mesh-2 {
+  background: #00ccff; 
+  width: 50vw;
+  height: 50vh;
+  bottom: -20%;
+  right: -10%;
+  animation-duration: 22s;
+}
+
+.mesh-3 {
+  background: #1a365d; 
+  width: 70vw;
+  height: 70vh;
+  top: 30%;
+  left: 30%;
+  animation-duration: 28s;
+  opacity: 0.3;
+}
+
+@keyframes float-blob {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(5%, 5%) scale(1.1); }
+  100% { transform: translate(-5%, -5%) scale(0.9); }
+}
+
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+.audio-player {
+  display: flex;
+  align-items: center;
+}
+
+.audio-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(6, 11, 25, 0.8);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  font-family: 'Teko', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  outline: none;
+}
+
+.audio-btn:hover {
+  background: rgba(0, 255, 136, 0.15);
+  box-shadow: 0 0 15px var(--primary-glow);
+  transform: translateY(-2px);
+}
+
+.audio-btn.playing {
+  background: var(--primary);
+  color: var(--bg);
+  box-shadow: 0 0 20px var(--primary-glow);
+}
+
+.equalizer {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 16px;
+  margin-right: 6px;
+}
+
+.bar {
+  width: 4px;
+  background-color: var(--bg);
+  border-radius: 2px;
+  animation: equalize 1s ease-in-out infinite;
+}
+
+.bar-1 { height: 10px; animation-delay: -0.4s; }
+.bar-2 { height: 16px; animation-delay: -0.2s; }
+.bar-3 { height: 12px; animation-delay: 0s; }
+
+@keyframes equalize {
+  0% { height: 4px; }
+  50% { height: 16px; }
+  100% { height: 4px; }
+}
