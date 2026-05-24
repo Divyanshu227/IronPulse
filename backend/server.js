@@ -6,15 +6,26 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 5001;
 const NODE_ENV = process.env.NODE_ENV || 'development';
+const normalizeOrigin = (origin) => origin.replace(/\/$/, '');
 const allowedOrigins = (process.env.CORS_ORIGIN || process.env.FRONTEND_URL || '')
   .split(',')
   .map((origin) => origin.trim())
+  .map(normalizeOrigin)
   .filter(Boolean);
 
 app.use(
   cors(
     allowedOrigins.length
-      ? { origin: allowedOrigins }
+      ? {
+          origin(origin, callback) {
+            if (!origin || allowedOrigins.includes(normalizeOrigin(origin))) {
+              callback(null, true);
+              return;
+            }
+
+            callback(new Error(`Origin ${origin} is not allowed by CORS`));
+          }
+        }
       : undefined
   )
 );
@@ -40,4 +51,3 @@ if (NODE_ENV === 'production') {
 app.listen(PORT, () => {
   console.log(`[GymBase] Server running on port ${PORT} (${NODE_ENV})`);
 });
-
