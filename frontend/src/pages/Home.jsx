@@ -9,16 +9,23 @@ const Motion = motion;
 const Home = () => {
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchExercises = async () => {
       try {
         const response = await api.get('/exercises');
+        if (!Array.isArray(response.data)) {
+          throw new Error('Exercise API returned an unexpected response.');
+        }
+
         setExercises(response.data);
-        setLoading(false);
+        setError('');
       } catch (error) {
         console.error('Error fetching exercises:', error);
+        setError('EXERCISE FEED OFFLINE');
+      } finally {
         setLoading(false);
       }
     };
@@ -91,6 +98,10 @@ const Home = () => {
         <div className="loading-wrapper">
           <div className="spinner"></div>
           <h2 style={{ fontFamily: 'Teko', color: 'var(--primary)'}}>LOAD PHASE INITIALIZING...</h2>
+        </div>
+      ) : error ? (
+        <div className="loading-wrapper">
+          <h2 style={{ fontFamily: 'Teko', color: '#ff2e63' }}>{error}</h2>
         </div>
       ) : (
         <Motion.div 

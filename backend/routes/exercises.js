@@ -10,12 +10,20 @@ const apiClient = axios.create({
 });
 
 const exercisesPath = (path = '') => `/api/exercises${path}`;
+const normalizeImageUrl = (image) =>
+  typeof image === 'string' ? image.replace(/^http:\/\//, 'https://') : image;
+const normalizeExercise = (exercise) =>
+  exercise && typeof exercise === 'object'
+    ? { ...exercise, image: normalizeImageUrl(exercise.image) }
+    : exercise;
+const normalizeExerciseResponse = (data) =>
+  Array.isArray(data) ? data.map(normalizeExercise) : normalizeExercise(data);
 
 // Proxy to get all exercises
 router.get('/', async (req, res) => {
   try {
     const response = await apiClient.get(exercisesPath());
-    res.json(response.data);
+    res.json(normalizeExerciseResponse(response.data));
   } catch (error) {
     console.error('Error fetching exercises:', error.message);
     res.status(error.response?.status || 500).json(error.response?.data || { error: 'Failed to fetch exercises' });
@@ -26,7 +34,7 @@ router.get('/', async (req, res) => {
 router.get('/id/:id', async (req, res) => {
   try {
     const response = await apiClient.get(exercisesPath(`/id/${req.params.id}`));
-    res.json(response.data);
+    res.json(normalizeExerciseResponse(response.data));
   } catch (error) {
     res.status(error.response?.status || 500).json(error.response?.data || { error: 'Failed to fetch exercise by ID' });
   }
@@ -36,7 +44,7 @@ router.get('/id/:id', async (req, res) => {
 router.get('/name/:name', async (req, res) => {
   try {
     const response = await apiClient.get(exercisesPath(`/name/${req.params.name}`));
-    res.json(response.data);
+    res.json(normalizeExerciseResponse(response.data));
   } catch (error) {
     res.status(error.response?.status || 500).json(error.response?.data || { error: 'Failed to fetch exercise by name' });
   }
@@ -46,7 +54,7 @@ router.get('/name/:name', async (req, res) => {
 router.get('/muscle/:muscle', async (req, res) => {
   try {
     const response = await apiClient.get(exercisesPath(`/muscle/${req.params.muscle}`));
-    res.json(response.data);
+    res.json(normalizeExerciseResponse(response.data));
   } catch (error) {
     res.status(error.response?.status || 500).json(error.response?.data || { error: 'Failed to fetch exercises by muscle' });
   }
