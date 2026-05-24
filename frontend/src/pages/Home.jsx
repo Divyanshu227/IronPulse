@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../lib/api';
 
 const Motion = motion;
+const PAGE_SIZE = 48;
 
 const Home = () => {
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     const fetchExercises = async () => {
@@ -33,14 +35,19 @@ const Home = () => {
     fetchExercises();
   }, []);
 
-  const filteredExercises = exercises.filter((ex) => {
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [searchQuery]);
+
+  const filteredExercises = useMemo(() => exercises.filter((ex) => {
     const query = searchQuery.toLowerCase();
     const nameMatch = ex.name.toLowerCase().includes(query);
     const muscleMatch = (ex.musclesAffected || []).some((m) =>
       m.toLowerCase().includes(query)
     );
     return nameMatch || muscleMatch;
-  });
+  }), [exercises, searchQuery]);
+  const visibleExercises = filteredExercises.slice(0, visibleCount);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -110,12 +117,11 @@ const Home = () => {
           initial="hidden"
           animate="show"
         >
-          <AnimatePresence>
-            {filteredExercises.map((exercise) => (
+          <AnimatePresence initial={false}>
+            {visibleExercises.map((exercise) => (
               <Motion.div 
                 key={exercise.id} 
                 variants={itemVariants} 
-                layout
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
@@ -123,7 +129,12 @@ const Home = () => {
               >
                 <Link to={`/exercise/${exercise.id}`} className="exercise-card">
                   <div className="card-img-container">
-                    <img src={exercise.image} alt={exercise.name} className="card-img" />
+                    <img
+                      src={exercise.image}
+                      alt={exercise.name}
+                      className="card-img"
+                      loading="lazy"
+                    />
                     <div className="card-img-overlay"></div>
                   </div>
                   <div className="card-info">
@@ -140,6 +151,18 @@ const Home = () => {
               </Motion.div>
             ))}
           </AnimatePresence>
+
+          {visibleCount < filteredExercises.length && (
+            <div className="load-more-wrapper">
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+              >
+                LOAD MORE
+              </button>
+            </div>
+          )}
 
           {filteredExercises.length === 0 && (
             <Motion.div 
